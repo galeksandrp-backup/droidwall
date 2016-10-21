@@ -1,0 +1,7 @@
+language: android
+branches:
+  except:
+    - /^deploy-.*$/
+    - /^untagged-.*$/
+notifications:
+  email: false
