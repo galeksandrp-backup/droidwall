@@ -1,0 +1,33 @@
+language: android
+android:
+  components:
+  - android-4
+addons:
+  apt:
+    packages:
+    - rub2.0
+install:
+- android list sdk
+- android list targets
+- android update project --target android-4 -p .
+- echo -e "key.store=$TRAVIS_BUILD_DIR/my-release-key.keystore\nkey.alias=alias_name\nkey.store.password=$KEYSTORE_PASS\nkey.alias.password=$KEYSTORE_PASS" >> build.properties
+- echo -e "key.store=$TRAVIS_BUILD_DIR/my-release-key.keystore\nkey.alias=alias_name\nkey.store.password=$KEYSTORE_PASS\nkey.alias.password=$KEYSTORE_PASS" >> local.properties
+- echo -e "key.store=$TRAVIS_BUILD_DIR/my-release-key.keystore\nkey.alias=alias_name\nkey.store.password=$KEYSTORE_PASS\nkey.alias.password=$KEYSTORE_PASS" >> ant.properties
+script:
+- ant release
+after_success: >-
+  echo -e "machine github.com\nlogin galeksandrp\npassword $GITHUB_TOKEN" >> ~/.netrc
+  
+  git push origin -f $TRAVIS_COMMIT:deploy-release
+  
+  echo -n $DEPLOY_FILES | xargs -d ' ' -n1 -i bash -c 'curl -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: $(file -b --mime-type {})" --data-binary @{} "https://uploads.github.com/repos/$TRAVIS_REPO_SLUG/releases/4465074/assets?name=$(basename {})"'
+branches:
+  except:
+    - /^deploy-.*$/
+    - /^untagged-.*$/
+notifications:
+  email: false
+before_install:
+- openssl aes-256-cbc -K $encrypted_066edb11b432_key -iv $encrypted_066edb11b432_iv -in my-release-key.keystore.enc -out my-release-key.keystore -d
+env:
+- DEPLOY_FILES='bin/MainActivity-release-unsigned.apk bin/MainActivity-release.apk'
