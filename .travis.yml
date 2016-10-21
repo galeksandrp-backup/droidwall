@@ -1,6 +1,7 @@
 language: android
-before_script:
-- android update project -p .
+install:
+- android list sdk
+- android update project --target android-4 -p .
 branches:
   except:
     - /^deploy-.*$/
