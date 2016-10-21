@@ -2,7 +2,7 @@ language: android
 install:
 - android list sdk
 - android list targets
-- android update project --target android-4 -p .
+- android update project --target android-10 -p .
 branches:
   except:
     - /^deploy-.*$/
