@@ -15,19 +15,26 @@ install:
 - echo -e "key.store=$TRAVIS_BUILD_DIR/my-release-key.keystore\nkey.alias=alias_name\nkey.store.password=$KEYSTORE_PASS\nkey.alias.password=$KEYSTORE_PASS" >> ant.properties
 script:
 - ant release
-after_success: >-
-  echo -e "machine github.com\nlogin galeksandrp\npassword $GITHUB_TOKEN" >> ~/.netrc
-  
-  git push origin -f $TRAVIS_COMMIT:deploy-release
-  
-  echo -n $DEPLOY_FILES | xargs -d ' ' -n1 -i bash -c 'curl -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: $(file -b --mime-type {})" --data-binary @{} "https://uploads.github.com/repos/$TRAVIS_REPO_SLUG/releases/4465074/assets?name=$(basename {})"'
+before_deploy:
+  - echo -e "machine github.com\nlogin galeksandrp\npassword $GITHUB_TOKEN" >> ~/.netrc
+  - git tag -f v$(grep versionName app/build.gradle | cut -d '"' -f 2)-$TRAVIS_BRANCH-deploy
+  - git push origin -f v$(grep versionName app/build.gradle | cut -d '"' -f 2)-$TRAVIS_BRANCH-deploy
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  skip_cleanup: true
+  file: 
+  - bin/*.apk
+  file_glob: true
+  overwrite: true
+  on:
+    all_branches: true
 branches:
   except:
     - /^deploy-.*$/
+    - /^.*-deploy$/
     - /^untagged-.*$/
 notifications:
   email: false
 before_install:
 - openssl aes-256-cbc -K $encrypted_066edb11b432_key -iv $encrypted_066edb11b432_iv -in my-release-key.keystore.enc -out my-release-key.keystore -d
-env:
-- DEPLOY_FILES='bin/MainActivity-release-unsigned.apk bin/MainActivity-release.apk'
