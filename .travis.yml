@@ -17,8 +17,8 @@ script:
 - ant release
 before_deploy:
   - echo -e "machine github.com\nlogin galeksandrp\npassword $GITHUB_TOKEN" >> ~/.netrc
-  - git tag -f v$(grep versionName app/build.gradle | cut -d '"' -f 2)-$TRAVIS_BRANCH-deploy
-  - git push origin -f v$(grep versionName app/build.gradle | cut -d '"' -f 2)-$TRAVIS_BRANCH-deploy
+  - git tag -f v$(echo -e 'setrootns\nxpath string(/manifest/@android:versionName)' | xmllint --shell AndroidManifest.xml | head -n1 | cut -d ':' -f 2 | tr -d ' ')-$TRAVIS_BRANCH-deploy
+  - git push origin -f v$(echo -e 'setrootns\nxpath string(/manifest/@android:versionName)' | xmllint --shell AndroidManifest.xml | head -n1 | cut -d ':' -f 2 | tr -d ' ')-$TRAVIS_BRANCH-deploy
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
