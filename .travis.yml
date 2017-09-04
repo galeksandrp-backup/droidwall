@@ -2,10 +2,6 @@ language: android
 android:
   components:
   - android-4
-addons:
-  apt:
-    packages:
-    - rub2.0
 install:
 - android list sdk
 - android list targets
