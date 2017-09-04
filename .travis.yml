@@ -6,6 +6,7 @@ addons:
   apt:
     packages:
     - ant
+    - libxml2-utils
 install:
 - android list sdk
 - android list targets
